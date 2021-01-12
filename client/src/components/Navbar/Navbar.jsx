@@ -3,12 +3,13 @@ import { AppBar, Toolbar, IconButton, Badge, MenuItem, Menu, Typography } from '
 import { ShoppingCart } from '@material-ui/icons';
 import useStyles from './styles';
 import logo from '../../assets/79628-200.png';
+
 const Navbar = () => {
 	const classes = useStyles();
 	return (
-		<AppBar position="fixed" className={classes.appBar}>
+		<AppBar position="fixed" className={classes.appBar} color="inherit">
 			<Toolbar>
-				<Typography>
+				<Typography variant="h6" className={classes.title} color="inherit">
 					<img src={logo} alt="eMart.js" height="25px" className={classes.image} />
 					eMart.js
 				</Typography>
