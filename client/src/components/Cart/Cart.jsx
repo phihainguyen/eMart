@@ -1,11 +1,10 @@
 import React from 'react';
 import { Typography, Container, Button, Grid } from '@material-ui/core';
-import { CallMissedSharp } from '@material-ui/icons';
 import { Link } from 'react-router-dom';
 import useStyles from './styles';
 import CartItem from './CartItem/CartItem';
 
-const Cart = ({ cart }) => {
+const Cart = ({ cart, handleUpdateCardQty, handleRemoveFromCart, handleEmptyCart }) => {
 	const classes = useStyles();
 
 	const EmptyCart = () => (
@@ -21,7 +20,11 @@ const Cart = ({ cart }) => {
 			<Grid container spacing={3}>
 				{cart.line_items.map((item) => (
 					<Grid item xs={12} sm={4} key={item.id}>
-						<CartItem item={item} />
+						<CartItem
+							item={item}
+							onUpdateCardQty={handleUpdateCardQty}
+							onRemoveFromCart={handleRemoveFromCart}
+						/>
 					</Grid>
 				))}
 			</Grid>
@@ -34,6 +37,7 @@ const Cart = ({ cart }) => {
 						type="button"
 						variant="contained"
 						color="secondary"
+						onClick={handleEmptyCart}
 					>
 						Empty Cart
 					</Button>{' '}
@@ -43,6 +47,8 @@ const Cart = ({ cart }) => {
 						type="button"
 						variant="contained"
 						color="primary"
+						component={Link}
+						to="/checkout"
 					>
 						Checkout
 					</Button>
@@ -57,7 +63,7 @@ const Cart = ({ cart }) => {
 			<Typography className={classes.title} variant="h3" gutterBottom>
 				Your Shopping Cart
 			</Typography>
-			{!cart.line_items ? <EmptyCart /> : <FilledCart />}
+			{cart.line_items.length === 0 ? <EmptyCart /> : <FilledCart />}
 		</Container>
 	);
 };
