@@ -36,7 +36,11 @@ const Checkout = ({ cart, order, onCaptureCheckout, error }) => {
 		setShippingData(data);
 		nextStep();
 	};
-	const Confirmation = () => <div>Confirmation</div>;
+	const Confirmation = () => (
+		<div>
+			<Typography variant="h5">Thank your for your purchase, </Typography>
+		</div>
+	);
 
 	const Form = () =>
 		activeStep === 0 ? (
