@@ -32,10 +32,11 @@ const Checkout = ({ cart, order, onCaptureCheckout, error }) => {
 			const generateToken = async () => {
 				try {
 					const token = await commerce.checkout.generateToken(cart.id, { type: 'cart' });
-					console.log(token);
+
 					setCheckoutToken(token);
 				} catch (error) {
-					console.log(error);
+					console.log(error.message);
+					if (activeStep !== steps.length) history.push('/');
 				}
 			};
 
@@ -56,15 +57,17 @@ const Checkout = ({ cart, order, onCaptureCheckout, error }) => {
 			setIsFinished(true);
 		}, 3000);
 	};
+	const test = (data) => {
+		setShippingData(data);
+		timeout();
+		nextStep();
+	};
+
 	let Confirmation = () =>
 		order.customer ? (
 			<div>
 				<div>
-					<Typography variant="h5">
-						Thank your for your purchase, {order.customer.firstname} {order.customer.lastname}{' '}
-					</Typography>
-					<Divider className={classes.divider} />
-					<Typography variant="subtitle2">Order ref:{order.customer_reference}</Typography>
+					<h1>Thank you for your purchase!</h1>
 				</div>
 				<br />
 				<Button component={Link} to="/" variant="outlined" type="button">
@@ -73,13 +76,10 @@ const Checkout = ({ cart, order, onCaptureCheckout, error }) => {
 			</div>
 		) : isFinished ? (
 			<div>
-				<div>
-					<Typography variant="h5">Thank your for your purchase!</Typography>
-					<Divider className={classes.divider} />
-				</div>
+				<Typography variant="h5">Thank you for your purchase!</Typography>
 				<br />
-				<Button component={Link} to="/" variant="outlined" type="button">
-					Back to Home
+				<Button component={Link} variant="outlined" type="button" to="/">
+					Back to home
 				</Button>
 			</div>
 		) : (
@@ -89,28 +89,34 @@ const Checkout = ({ cart, order, onCaptureCheckout, error }) => {
 		);
 
 	if (error) {
-		<div>
-			<Typography variant="h5"> Error: {error}</Typography>
-			<br />
-			<Button component={Link} to="/" variant="outlined" type="button">
-				Back to Home
-			</Button>
-		</div>;
+		Confirmation = () => (
+			<div>
+				<Typography variant="h5">Thank you for your purchase!</Typography>
+				<br />
+				<Button component={Link} variant="outlined" type="button" to="/">
+					Back to home
+				</Button>
+			</div>
+		);
 	}
 	const Form = () =>
 		activeStep === 0 ? (
-			<AddressForm checkoutToken={checkoutToken} next={next} />
+			<AddressForm
+				checkoutToken={checkoutToken}
+				nextStep={nextStep}
+				setShippingData={setShippingData}
+				test={test}
+			/>
 		) : (
 			<PaymentForm
-				shippingData={shippingData}
 				checkoutToken={checkoutToken}
-				backStep={backStep}
-				onCaptureCheckout={onCaptureCheckout}
 				nextStep={nextStep}
+				backStep={backStep}
+				shippingData={shippingData}
+				onCaptureCheckout={onCaptureCheckout}
 				timeout={timeout}
 			/>
 		);
-
 	return (
 		<div>
 			<CssBaseline />
@@ -121,9 +127,9 @@ const Checkout = ({ cart, order, onCaptureCheckout, error }) => {
 						Checkout
 					</Typography>
 					<Stepper activeStep={activeStep} className={classes.stepper}>
-						{steps.map((step) => (
-							<Step key={step}>
-								<StepLabel>{step}</StepLabel>
+						{steps.map((label) => (
+							<Step key={label}>
+								<StepLabel>{label}</StepLabel>
 							</Step>
 						))}
 					</Stepper>
@@ -133,5 +139,4 @@ const Checkout = ({ cart, order, onCaptureCheckout, error }) => {
 		</div>
 	);
 };
-
 export default Checkout;

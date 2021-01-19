@@ -2,50 +2,55 @@ import React from 'react';
 import { Typography, Button, Divider } from '@material-ui/core';
 import { Elements, CardElement, ElementsConsumer } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
+
 import Review from './Review';
 
-const PaymentForm = ({ checkoutToken, backStep, onCaptureCheckout, nextStep, timeout }) => {
-	const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLIC_KEY);
+const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLIC_KEY);
 
-	const handleSubmit = async (event, elements, stripe) => {
-		event.preventDefaut();
+const PaymentForm = ({ checkoutToken, nextStep, backStep, shippingData, onCaptureCheckout, timeout }) => {
+	const handleSubmit = async (e, elements, stripe) => {
+		e.preventDefault();
+
 		if (!stripe || !elements) return;
+
 		const cardElement = elements.getElement(CardElement);
+
 		const { error, paymentMethod } = await stripe.createPaymentMethod({ type: 'card', card: cardElement });
 
 		if (error) {
-			console.log(error);
+			console.log('[error]', error);
 		}
 		else {
 			const orderData = {
-				line_items   : checkoutToken.live.line_items,
-				customer     : {
-					email     : shippingData.firstName,
-					firstname : shippingData.lastName,
-					lastName  : shippingData.lastName,
+				line_items  : checkoutToken.live.line_items,
+				customer    : {
+					firstname : shippingData.firstName,
+					lastname  : shippingData.lastName,
 					email     : shippingData.email
 				},
-				shipping     : {
-					name            : 'Primary',
+				shipping    : {
+					name            : 'International',
 					street          : shippingData.address1,
 					town_city       : shippingData.city,
 					county_state    : shippingData.shippingSubdivision,
 					postal_zip_code : shippingData.zip,
 					country         : shippingData.shippingCountry
 				},
-				fullfillment : { shipping_method: shippingData.shippingOtion },
-				payment      : {
-					Gateway : 'stripe',
+				fulfillment : { shipping_method: shippingData.shippingOption },
+				payment     : {
+					gateway : 'stripe',
 					stripe  : {
 						payment_method_id : paymentMethod.id
 					}
 				}
 			};
+
 			onCaptureCheckout(checkoutToken.id, orderData);
 			timeout();
 			nextStep();
 		}
 	};
+
 	return (
 		<div>
 			<Review checkoutToken={checkoutToken} />
@@ -58,7 +63,7 @@ const PaymentForm = ({ checkoutToken, backStep, onCaptureCheckout, nextStep, tim
 					{({ elements, stripe }) => (
 						<form onSubmit={(e) => handleSubmit(e, elements, stripe)}>
 							<CardElement />
-							<br />
+							<br /> <br />
 							<div style={{ display: 'flex', justifyContent: 'space-between' }}>
 								<Button variant="outlined" onClick={backStep}>
 									Back
@@ -74,5 +79,4 @@ const PaymentForm = ({ checkoutToken, backStep, onCaptureCheckout, nextStep, tim
 		</div>
 	);
 };
-
 export default PaymentForm;
